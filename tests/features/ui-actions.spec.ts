@@ -25,11 +25,11 @@ test.describe('UI actions', { tag: ['@features', '@ui-actions'] }, () => {
     await uiLab.page.keyboard.press('ControlOrMeta+A');
     await uiLab.page.keyboard.type('Replaced User');
     await uiLab.tooltipTrigger.hover();
+    await expect(uiLab.tooltip).toBeVisible();
     await uiLab.doubleClickButton.dblclick();
     await uiLab.dragSource.dragTo(uiLab.dropTarget);
 
     await expect(uiLab.nameInput).toHaveValue('Replaced User');
-    await expect(uiLab.tooltip).toBeVisible();
     await expect(uiLab.doubleClickStatus).toHaveText('Double-click received');
     await expect(uiLab.dropTarget).toHaveText('Dropped: Drag item');
   });

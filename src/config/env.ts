@@ -25,13 +25,18 @@ const optionalPositiveInteger = z.preprocess(
   z.coerce.number().int().positive().optional(),
 );
 
+const optionalNonEmptyString = z.preprocess(
+  (value) => (value === '' ? undefined : value),
+  z.string().min(1).optional(),
+);
+
 const booleanValue = z.enum(['true', 'false']).transform((value) => value === 'true');
 
 const schema = z.object({
   TEST_ENV: z.string().default('demo'),
   BASE_URL: z.url().default('https://opensource-demo.orangehrmlive.com'),
-  TEST_USERNAME: z.string().min(1).optional(),
-  TEST_PASSWORD: z.string().min(1).optional(),
+  TEST_USERNAME: optionalNonEmptyString,
+  TEST_PASSWORD: optionalNonEmptyString,
   CI: booleanValue.default(false),
   HEADLESS: booleanValue.default(true),
   WORKERS: optionalPositiveInteger,
