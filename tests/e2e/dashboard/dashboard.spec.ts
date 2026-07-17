@@ -7,6 +7,6 @@ test.describe('Dashboard', { tag: ['@smoke', '@regression'] }, () => {
   }) => {
     await authenticatedPage.goto('/web/index.php/dashboard/index');
 
-    await dashboardPage.expectLoaded();
+    await dashboardPage.expectLoaded(); // Test Demo
   });
 });
