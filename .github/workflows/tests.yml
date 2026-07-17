@@ -59,7 +59,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - run: npx playwright install --with-deps chromium ${{ matrix.browser }}
       - name: Run tests
         shell: bash
         run: |
@@ -87,8 +87,6 @@ jobs:
     env:
       CI: 'true'
       BASE_URL: https://opensource-demo.orangehrmlive.com
-      TEST_USERNAME: ${{ secrets.ORANGEHRM_USERNAME }}
-      TEST_PASSWORD: ${{ secrets.ORANGEHRM_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -97,3 +95,20 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run test:api
+
+  features:
+    name: Playwright feature coverage
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:features

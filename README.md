@@ -31,6 +31,7 @@ traffic, so use conservative worker counts for scheduled suites.
 | `npm run test:smoke`      | Run tests tagged `@smoke`                    |
 | `npm run test:regression` | Run tests tagged `@regression`               |
 | `npm run test:api`        | Run browser-independent API checks           |
+| `npm run test:features`   | Run deterministic Playwright feature tests   |
 | `npm run test:chromium`   | Run Chromium plus authentication setup       |
 | `npm run test:parallel`   | Force fully parallel mode                    |
 | `npm run test:ui`         | Open Playwright UI mode                      |
@@ -48,6 +49,9 @@ npx playwright test --project=chromium --shard=1/4
 ```text
 tests/                 Executable specifications, grouped by capability
   setup/               Authentication dependency project
+  features/            Deterministic browser-feature coverage
+  fixtures/            Local UI lab and reusable test fixtures
+  support/             Self-contained mock API server
 src/
   api/                 Typed HTTP service wrappers
   components/          Reusable UI fragments (navigation, user menu)
@@ -97,3 +101,12 @@ Username/Password credential with ID `orangehrm-demo`.
 OrangeHRM's public demo is shared and reset outside this framework's control. Keep smoke tests
 read-only. For create/update/delete coverage, point `BASE_URL` at a dedicated environment and use
 unique test data plus cleanup through API fixtures.
+
+## Extended Playwright feature coverage
+
+The `features` project runs against a deterministic local UI lab rather than the shared public demo.
+It covers form controls, keyboard and mouse input, uploads/downloads, popups, dialogs, iframes,
+console/request/response listeners, session and local storage, locator strategies, drag-and-drop,
+content-editable fields, and data-driven scenarios. The API project includes live read-only
+OrangeHRM contracts plus a local mock service for parallel CRUD, authentication, query, schema, and
+error-response testing.

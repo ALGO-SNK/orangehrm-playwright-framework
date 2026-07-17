@@ -42,22 +42,27 @@ export default defineConfig({
       testMatch: /.*\/api\/.*\.spec\.ts/,
     },
     {
+      name: 'features',
+      testMatch: /.*\/features\/.*\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
       dependencies: ['setup'],
-      testIgnore: [/.*\.setup\.ts/, /.*\/api\/.*\.spec\.ts/],
+      testMatch: /.*\/e2e\/.*\.spec\.ts/,
     },
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
       dependencies: ['setup'],
-      testIgnore: [/.*\.setup\.ts/, /.*\/api\/.*\.spec\.ts/],
+      testMatch: /.*\/e2e\/.*\.spec\.ts/,
     },
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
       dependencies: ['setup'],
-      testIgnore: [/.*\.setup\.ts/, /.*\/api\/.*\.spec\.ts/],
+      testMatch: /.*\/e2e\/.*\.spec\.ts/,
     },
   ],
 });

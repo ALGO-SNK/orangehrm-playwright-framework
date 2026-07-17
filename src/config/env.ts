@@ -4,6 +4,8 @@ import { resolve } from 'node:path';
 import { config as loadEnv } from 'dotenv';
 import { z } from 'zod';
 
+import type { Credentials } from '../models/Credentials.js';
+
 const injectedEnvironment = { ...process.env };
 const testEnvironment = injectedEnvironment.TEST_ENV ?? 'demo';
 
@@ -23,13 +25,18 @@ const optionalPositiveInteger = z.preprocess(
   z.coerce.number().int().positive().optional(),
 );
 
+const optionalNonEmptyString = z.preprocess(
+  (value) => (value === '' ? undefined : value),
+  z.string().min(1).optional(),
+);
+
 const booleanValue = z.enum(['true', 'false']).transform((value) => value === 'true');
 
 const schema = z.object({
   TEST_ENV: z.string().default('demo'),
   BASE_URL: z.url().default('https://opensource-demo.orangehrmlive.com'),
-  TEST_USERNAME: z.string().min(1, 'TEST_USERNAME is required. Copy .env.example to .env.'),
-  TEST_PASSWORD: z.string().min(1, 'TEST_PASSWORD is required. Copy .env.example to .env.'),
+  TEST_USERNAME: optionalNonEmptyString,
+  TEST_PASSWORD: optionalNonEmptyString,
   CI: booleanValue.default(false),
   HEADLESS: booleanValue.default(true),
   WORKERS: optionalPositiveInteger,
@@ -65,3 +72,13 @@ export const env = {
   expectTimeoutMs: parsed.data.EXPECT_TIMEOUT_MS,
   ignoreHttpsErrors: parsed.data.IGNORE_HTTPS_ERRORS,
 } as const;
+
+export function requireCredentials(): Credentials {
+  if (!env.username || !env.password) {
+    throw new Error(
+      'TEST_USERNAME and TEST_PASSWORD are required for authenticated UI tests. ' +
+        'Copy .env.example to .env or configure CI secrets.',
+    );
+  }
+  return { username: env.username, password: env.password };
+}
