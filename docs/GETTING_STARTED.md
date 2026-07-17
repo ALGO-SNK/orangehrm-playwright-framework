@@ -6,14 +6,16 @@ framework in CI. Run commands from the project root—the directory containing `
 
 ## 1. Understand what the framework covers
 
-The included tests demonstrate four useful patterns:
+The included tests demonstrate business and framework-level patterns:
 
-| Capability   | Specification                           | What it demonstrates                           |
-| ------------ | --------------------------------------- | ---------------------------------------------- |
-| Health check | `tests/api/health.spec.ts`              | Browser-independent HTTP testing               |
-| Login        | `tests/e2e/auth/login.spec.ts`          | Positive and negative unauthenticated UI tests |
-| Dashboard    | `tests/e2e/dashboard/dashboard.spec.ts` | Reusing authenticated browser state            |
-| PIM          | `tests/e2e/pim/employee-list.spec.ts`   | Page navigation and read-only employee results |
+| Capability   | Specification                           | What it demonstrates                            |
+| ------------ | --------------------------------------- | ----------------------------------------------- |
+| Health check | `tests/api/health.spec.ts`              | Browser-independent HTTP testing                |
+| Login        | `tests/e2e/auth/login.spec.ts`          | Positive and negative unauthenticated UI tests  |
+| Dashboard    | `tests/e2e/dashboard/dashboard.spec.ts` | Reusing authenticated browser state             |
+| PIM          | `tests/e2e/pim/employee-list.spec.ts`   | Page navigation and read-only employee results  |
+| Feature lab  | `tests/features/*.spec.ts`              | Dialogs, frames, storage, events and UI actions |
+| Mock API     | `tests/api/mock-api.spec.ts`            | Parallel CRUD, auth, query and error testing    |
 
 Playwright expands the four UI cases across Chromium, Firefox, and WebKit. An authentication setup
 project creates browser state before authenticated UI tests, while the API project stays independent
@@ -138,7 +140,8 @@ RETRIES=2
 ```
 
 Run it by setting `TEST_ENV=qa` in `.env` or in the shell. Configuration is parsed by Zod in
-`src/config/env.ts`; missing credentials, invalid URLs, and invalid numeric values fail immediately.
+`src/config/env.ts`; invalid URLs and numeric values fail immediately. Credentials are required only
+when the authenticated OrangeHRM setup project runs, so API and feature-lab projects stay independent.
 
 ## 7. Run the first checks
 
@@ -146,6 +149,12 @@ Start with the browser-independent health test:
 
 ```bash
 npm run test:api
+```
+
+Run deterministic browser-feature coverage without OrangeHRM credentials:
+
+```bash
+npm run test:features
 ```
 
 Then run the Chromium smoke suite:
@@ -712,6 +721,7 @@ failure reproduces with one worker.
 | Validate source       | `npm run validate`                                    |
 | Run everything        | `npm test`                                            |
 | Run API checks        | `npm run test:api`                                    |
+| Run feature coverage  | `npm run test:features`                               |
 | Run smoke tests       | `npm run test:smoke`                                  |
 | Run regression tests  | `npm run test:regression`                             |
 | Run Chromium          | `npm run test:chromium`                               |

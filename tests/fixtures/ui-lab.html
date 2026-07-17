@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Playwright UI Interaction Lab</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 2rem;
+      }
+      section {
+        border: 1px solid #bbb;
+        margin: 1rem 0;
+        padding: 1rem;
+      }
+      label {
+        display: block;
+        margin: 0.5rem 0;
+      }
+      #drag-source,
+      #drop-target {
+        display: inline-block;
+        padding: 1rem;
+        margin: 0.5rem;
+      }
+      #drag-source {
+        background: #cdf;
+      }
+      #drop-target {
+        border: 2px dashed #777;
+      }
+      #tooltip {
+        display: none;
+      }
+      #hover-target:hover + #tooltip {
+        display: inline;
+      }
+      table {
+        border-collapse: collapse;
+      }
+      td,
+      th {
+        border: 1px solid #aaa;
+        padding: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Playwright UI Interaction Lab</h1>
+
+    <section aria-label="Profile form section">
+      <h2>Profile form</h2>
+      <form aria-label="Profile form" id="profile-form">
+        <label>Name <input data-testid="name-input" name="name" placeholder="Full name" /></label>
+        <label>Email <input name="email" type="email" placeholder="name@example.com" /></label>
+        <label>
+          Country
+          <select name="country">
+            <option value="">Select country</option>
+            <option value="IN">India</option>
+            <option value="GB">United Kingdom</option>
+            <option value="US">United States</option>
+          </select>
+        </label>
+        <label><input name="newsletter" type="checkbox" /> Subscribe to newsletter</label>
+        <fieldset>
+          <legend>Plan</legend>
+          <label><input name="plan" type="radio" value="starter" /> Starter</label>
+          <label><input name="plan" type="radio" value="enterprise" /> Enterprise</label>
+        </fieldset>
+        <label>Volume <input name="volume" type="range" min="0" max="10" value="5" /></label>
+        <button type="submit">Save profile</button>
+        <button id="reset-profile" type="reset">Reset profile</button>
+      </form>
+      <output aria-live="polite" id="form-status"></output>
+    </section>
+
+    <section aria-label="Mouse and keyboard actions">
+      <h2>Mouse and keyboard</h2>
+      <button id="hover-target">Hover for help</button
+      ><span id="tooltip" role="tooltip">Helpful text</span>
+      <button id="double-click">Double-click me</button>
+      <output id="double-click-status"></output>
+      <div draggable="true" id="drag-source">Drag item</div>
+      <div id="drop-target">Drop here</div>
+      <label
+        >Notes
+        <div contenteditable="true" data-testid="notes-editor" role="textbox"></div
+      ></label>
+    </section>
+
+    <section aria-label="Browser events">
+      <h2>Browser events</h2>
+      <button id="alert-button">Show alert</button>
+      <button id="confirm-button">Show confirmation</button>
+      <button id="prompt-button">Show prompt</button>
+      <button id="console-button">Write console message</button>
+      <button id="popup-button">Open popup</button>
+      <button id="fetch-button">Fetch items</button>
+      <a download="sample.csv" href="data:text/csv,name%0AAlice">Download CSV</a>
+      <label>Upload résumé <input id="file-input" type="file" /></label>
+      <output id="event-status"></output>
+      <output id="api-status"></output>
+    </section>
+
+    <section aria-label="Frame example">
+      <h2>Frame</h2>
+      <iframe
+        title="Payment frame"
+        srcdoc='<!doctype html><html><body><label>Card number <input /></label><button id="pay">Pay now</button><output id="payment-status"></output><script>document.querySelector("#pay").addEventListener("click",()=>document.querySelector("#payment-status").textContent="Payment submitted")</script></body></html>'
+      ></iframe>
+    </section>
+
+    <section aria-label="User table section">
+      <h2>Users</h2>
+      <table aria-label="Users">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Asha</td>
+            <td>Administrator</td>
+          </tr>
+          <tr>
+            <td>Ben</td>
+            <td>Employee</td>
+          </tr>
+          <tr>
+            <td>Chen</td>
+            <td>Employee</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <script>
+      const status = document.querySelector('#event-status');
+      document.querySelector('#profile-form').addEventListener('submit', (event) => {
+        event.preventDefault();
+        const data = new FormData(event.currentTarget);
+        document.querySelector('#form-status').textContent = JSON.stringify(
+          Object.fromEntries(data),
+        );
+      });
+      document.querySelector('#double-click').addEventListener('dblclick', () => {
+        document.querySelector('#double-click-status').textContent = 'Double-click received';
+      });
+      document.querySelector('#drag-source').addEventListener('dragstart', (event) => {
+        event.dataTransfer.setData('text/plain', 'Drag item');
+      });
+      document
+        .querySelector('#drop-target')
+        .addEventListener('dragover', (event) => event.preventDefault());
+      document.querySelector('#drop-target').addEventListener('drop', (event) => {
+        event.preventDefault();
+        event.currentTarget.textContent = `Dropped: ${event.dataTransfer.getData('text/plain')}`;
+      });
+      document
+        .querySelector('#alert-button')
+        .addEventListener('click', () => alert('Alert received'));
+      document.querySelector('#confirm-button').addEventListener('click', () => {
+        status.textContent = confirm('Continue operation?') ? 'Confirmed' : 'Cancelled';
+      });
+      document.querySelector('#prompt-button').addEventListener('click', () => {
+        status.textContent = `Hello ${prompt('What is your name?', 'Guest') ?? 'Nobody'}`;
+      });
+      document
+        .querySelector('#console-button')
+        .addEventListener('click', () => console.log('UI lab console event'));
+      document
+        .querySelector('#popup-button')
+        .addEventListener('click', () => window.open('/popup', '_blank'));
+      document.querySelector('#fetch-button').addEventListener('click', async () => {
+        const response = await fetch('/api/items?limit=2');
+        const data = await response.json();
+        document.querySelector('#api-status').textContent = `${data.items.length} items loaded`;
+      });
+      document.querySelector('#file-input').addEventListener('change', (event) => {
+        status.textContent = event.target.files[0]?.name ?? 'No file';
+      });
+    </script>
+  </body>
+</html>

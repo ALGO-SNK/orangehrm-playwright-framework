@@ -39,6 +39,8 @@ keep these inside Page Objects or components.
 - `@regression`: broader business coverage
 - `@api`: HTTP/service-level coverage
 - capability tag such as `@auth` or `@pim`: ownership and selective runs
+- `@features`: deterministic browser-capability coverage independent of OrangeHRM
+- `@data-driven`: parameterized scenarios generated from typed datasets
 
 Keep a smoke test under two minutes. Quarantine is not a fix: capture evidence, create a defect,
 assign an owner and expiry date, then repair or remove the test.
@@ -50,6 +52,17 @@ assign an owner and expiry date, then repair or remove the test.
 - Avoid fixed sleeps; wait on a user-visible state, response, or domain event.
 - Keep cleanup in fixtures or `try/finally` when a test creates server data.
 - Avoid destructive cases on the shared public demo.
+- Use the per-test mock API for mutation, authorization, and error-path coverage.
+
+## Deterministic feature lab
+
+`tests/fixtures/ui-lab.html` is intercepted at `http://playwright.test` by a context-level route. It
+provides stable controls for demonstrating Playwright features that OrangeHRM does not reliably
+expose. The `features` project does not depend on OrangeHRM authentication or external network
+availability. Feature tests prove framework capabilities, while E2E tests prove OrangeHRM behavior.
+
+The mock API binds to an ephemeral loopback port for every test. This makes CRUD and negative tests
+parallel-safe and prevents automation examples from creating or deleting records in the public demo.
 
 ## Adding a capability
 
