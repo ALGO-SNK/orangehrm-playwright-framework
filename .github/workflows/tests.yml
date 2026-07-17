@@ -1,0 +1,99 @@
+name: Playwright quality gates
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+  schedule:
+    - cron: '30 20 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      test_grep:
+        description: Optional Playwright tag, for example @smoke
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: playwright-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Static quality gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run format:check
+
+  test:
+    name: ${{ matrix.browser }} / shard ${{ matrix.shard }}
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+        shard: [1, 2]
+    env:
+      CI: 'true'
+      BASE_URL: https://opensource-demo.orangehrmlive.com
+      TEST_USERNAME: ${{ secrets.ORANGEHRM_USERNAME }}
+      TEST_PASSWORD: ${{ secrets.ORANGEHRM_PASSWORD }}
+      TEST_GREP: ${{ inputs.test_grep }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Run tests
+        shell: bash
+        run: |
+          args=(--project=${{ matrix.browser }} --shard=${{ matrix.shard }}/2)
+          if [[ -n "${TEST_GREP}" ]]; then args+=(--grep "${TEST_GREP}"); fi
+          npx playwright test "${args[@]}"
+      - name: Upload test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: results-${{ matrix.browser }}-${{ matrix.shard }}
+          path: |
+            blob-report
+            playwright-report
+            test-results
+            reports
+          if-no-files-found: ignore
+          retention-days: 14
+
+  api:
+    name: API checks
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CI: 'true'
+      BASE_URL: https://opensource-demo.orangehrmlive.com
+      TEST_USERNAME: ${{ secrets.ORANGEHRM_USERNAME }}
+      TEST_PASSWORD: ${{ secrets.ORANGEHRM_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run test:api

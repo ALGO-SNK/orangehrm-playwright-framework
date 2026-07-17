@@ -1,0 +1,13 @@
+services:
+  playwright:
+    build: .
+    env_file:
+      - .env
+    environment:
+      CI: 'true'
+      WORKERS: '2'
+    volumes:
+      - ./playwright-report:/app/playwright-report
+      - ./test-results:/app/test-results
+      - ./reports:/app/reports
+    ipc: host
