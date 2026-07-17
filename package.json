@@ -1,0 +1,45 @@
+{
+  "name": "orangehrm-playwright-enterprise-framework",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Enterprise-ready Playwright Page Object Model test automation framework for OrangeHRM",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "clean": "rimraf test-results playwright-report reports .auth",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:regression": "playwright test --grep @regression",
+    "test:api": "playwright test --project=api",
+    "test:chromium": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:webkit": "playwright test --project=webkit",
+    "test:parallel": "playwright test --fully-parallel",
+    "report": "playwright show-report",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "validate": "npm run typecheck && npm run lint && npm run format:check && playwright test --list"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.61.1",
+    "@types/node": "26.1.1",
+    "cross-env": "10.1.0",
+    "dotenv": "17.4.2",
+    "eslint": "10.7.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-playwright": "2.10.5",
+    "prettier": "3.9.5",
+    "rimraf": "6.1.3",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.64.0",
+    "zod": "4.4.3"
+  }
+}
